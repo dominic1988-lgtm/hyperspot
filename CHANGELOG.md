@@ -9,6 +9,12 @@ release-plz updates this file in the Release PR.
 
 ## [Unreleased]
 
+## [0.1.2](https://github.com/dominic1988-lgtm/hyperspot/compare/cf-system-sdk-directory-v0.1.1...cf-system-sdk-directory-v0.1.2) - 2026-01-27
+
+### Other
+
+- updated the following local packages: cf-modkit-transport-grpc
+
 ## [0.1.1](https://github.com/hypernetix/hyperspot/compare/cf-system-sdk-directory-v0.1.0...cf-system-sdk-directory-v0.1.1) - 2026-01-26
 
 ### Other
