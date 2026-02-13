@@ -60,9 +60,10 @@ async fn real_middlewares_observe_documented_order() -> Result<()> {
                 "bind_addr": "127.0.0.1:0",
                 "cors_enabled": true,
                 "auth_disabled": true,
+                "prefix_path": "/cf",
                 "defaults": {
                     "rate_limit": { "rps": 1, "burst": 1, "in_flight": 64 }
-                }
+                },
             }
         }
     });
@@ -72,10 +73,10 @@ async fn real_middlewares_observe_documented_order() -> Result<()> {
     api.init(&ctx).await?;
 
     // Register an endpoint that enables both MIME validation and rate limiting.
-    let router = Router::new();
+    let mut router = Router::new();
     let mut builder = OperationBuilder::post("/tests/v1/middleware-order");
     builder.require_rate_limit(1, 1, 64);
-    let router = builder
+    router = builder
         .operation_id("test:middleware-order")
         .summary("Middleware order test endpoint")
         .public()
@@ -97,7 +98,7 @@ async fn real_middlewares_observe_documented_order() -> Result<()> {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/tests/v1/middleware-order")
+                .uri("/cf/tests/v1/middleware-order")
                 .header("origin", "https://example.com")
                 .header("x-request-id", "fixed-req-1")
                 .header("content-type", "text/plain")
@@ -125,7 +126,7 @@ async fn real_middlewares_observe_documented_order() -> Result<()> {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/tests/v1/middleware-order")
+                .uri("/cf/tests/v1/middleware-order")
                 .header("origin", "https://example.com")
                 .header("content-type", "application/json")
                 .body(Body::from(r#"{"ok":true}"#))?,
@@ -154,7 +155,7 @@ async fn real_middlewares_observe_documented_order() -> Result<()> {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/tests/v1/middleware-order")
+                .uri("/cf/tests/v1/middleware-order")
                 .header("origin", "https://example.com")
                 .header("content-type", "application/json")
                 .body(Body::from(r#"{"ok":true}"#))?,

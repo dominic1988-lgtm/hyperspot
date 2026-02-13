@@ -135,7 +135,8 @@ async fn rejects_non_base_feature_requirement() {
                 "bind_addr": "0.0.0.0:8080",
                 "enable_docs": false,
                 "cors_enabled": false,
-                "auth_disabled": true
+                "auth_disabled": true,
+                "prefix_path": "/cf",
             }
         }
     });
@@ -146,20 +147,20 @@ async fn rejects_non_base_feature_requirement() {
     let api_gateway = api_gateway::ApiGateway::default();
     api_gateway.init(&api_ctx).await.expect("Failed to init");
 
-    let router = Router::new();
+    let mut router = Router::new();
     let test_module = TestLicenseModule;
-    let router = test_module
+    router = test_module
         .register_rest(&test_ctx, router, &api_gateway)
         .expect("Failed to register routes");
 
-    let router = api_gateway
+    router = api_gateway
         .rest_finalize(&api_ctx, router)
         .expect("Failed to finalize");
 
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/license/bad")
+                .uri("/cf/tests/v1/license/bad")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -177,7 +178,8 @@ async fn allows_base_feature_requirement() {
                 "bind_addr": "0.0.0.0:8080",
                 "enable_docs": false,
                 "cors_enabled": false,
-                "auth_disabled": true
+                "auth_disabled": true,
+                "prefix_path": "/cf",
             }
         }
     });
@@ -201,7 +203,7 @@ async fn allows_base_feature_requirement() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/license/good")
+                .uri("/cf/tests/v1/license/good")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -219,7 +221,8 @@ async fn allows_no_license_requirement() {
                 "bind_addr": "0.0.0.0:8080",
                 "enable_docs": false,
                 "cors_enabled": false,
-                "auth_disabled": true
+                "auth_disabled": true,
+                "prefix_path": "/cf",
             }
         }
     });
@@ -230,9 +233,9 @@ async fn allows_no_license_requirement() {
     let api_gateway = api_gateway::ApiGateway::default();
     api_gateway.init(&api_ctx).await.expect("Failed to init");
 
-    let router = Router::new();
+    let mut router = Router::new();
     let test_module = TestLicenseModule;
-    let router = test_module
+    router = test_module
         .register_rest(&test_ctx, router, &api_gateway)
         .expect("Failed to register routes");
 
@@ -243,7 +246,7 @@ async fn allows_no_license_requirement() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/license/none")
+                .uri("/cf/tests/v1/license/none")
                 .body(Body::empty())
                 .unwrap(),
         )

@@ -39,6 +39,7 @@ fn create_test_module_ctx_with_body_limit(limit_bytes: usize) -> ModuleCtx {
         "bind_addr": "127.0.0.1:0",
         "cors_enabled": true,
         "auth_disabled": true,
+        "prefix_path": "/cf",
         "defaults": {
             "body_limit_bytes": limit_bytes,
             "rate_limit": {
@@ -158,7 +159,8 @@ async fn test_body_limit_with_cors() {
 async fn test_default_body_limit() {
     let config = wrap_config(&serde_json::json!({
         "bind_addr": "127.0.0.1:0",
-        "auth_disabled": true
+        "auth_disabled": true,
+        "prefix_path": "/cf",
     }));
 
     let hub = Arc::new(modkit::ClientHub::new());

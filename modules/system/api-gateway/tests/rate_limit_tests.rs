@@ -138,6 +138,7 @@ async fn test_rate_limit_enforcement() {
         "bind_addr": "127.0.0.1:0",
         "cors_enabled": false,
         "auth_disabled": true,
+        "prefix_path": "/cf",
         "defaults": {
             "rate_limit": {
                 "rps": 50,
@@ -171,6 +172,7 @@ async fn test_openapi_includes_rate_limit_extensions() {
     let config = serde_json::json!({
         "bind_addr": "127.0.0.1:0",
         "cors_enabled": false,
+        "prefix_path": "/cf",
         "auth_disabled": true
     });
 

@@ -39,6 +39,7 @@ fn create_test_module_ctx_with_cors() -> ModuleCtx {
     let config = wrap_config(&serde_json::json!({
         "bind_addr": "127.0.0.1:0",
         "cors_enabled": true,
+        "prefix_path": "/cf",
         "cors": {
             "allowed_origins": ["https://example.com"],
             "allowed_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -65,6 +66,7 @@ fn create_test_module_ctx_permissive_cors() -> ModuleCtx {
     let config = wrap_config(&serde_json::json!({
         "bind_addr": "127.0.0.1:0",
         "cors_enabled": true,
+        "prefix_path": "/cf",
         "auth_disabled": true
     }));
 
@@ -178,7 +180,8 @@ async fn test_cors_disabled() {
     let config = wrap_config(&serde_json::json!({
         "bind_addr": "127.0.0.1:0",
         "cors_enabled": false,
-        "auth_disabled": true
+        "auth_disabled": true,
+        "prefix_path": "/cf",
     }));
 
     let hub = Arc::new(modkit::ClientHub::new());
@@ -214,6 +217,7 @@ async fn test_cors_config_validation() {
     let config = wrap_config(&serde_json::json!({
         "bind_addr": "127.0.0.1:0",
         "cors_enabled": true,
+        "prefix_path": "/cf",
         "cors": {
             "allowed_origins": ["https://example.com"],
             "allowed_methods": ["GET", "POST"],

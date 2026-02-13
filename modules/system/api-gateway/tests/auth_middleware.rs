@@ -165,6 +165,7 @@ async fn test_auth_disabled_mode() {
                 "enable_docs": true,
                 "cors_enabled": false,
                 "auth_disabled": true,
+                "prefix_path": "/cf",
             }
         }
     });
@@ -176,9 +177,9 @@ async fn test_auth_disabled_mode() {
     api_gateway.init(&api_ctx).await.expect("Failed to init");
 
     // Register test module
-    let router = Router::new();
+    let mut router = Router::new();
     let test_module = TestAuthModule;
-    let router = test_module
+    router = test_module
         .register_rest(&test_ctx, router, &api_gateway)
         .expect("Failed to register routes");
 
@@ -192,7 +193,7 @@ async fn test_auth_disabled_mode() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -209,7 +210,7 @@ async fn test_auth_disabled_mode() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/public")
+                .uri("/cf/tests/v1/api/public")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -233,6 +234,7 @@ async fn test_public_routes_accessible() {
                 "enable_docs": true,
                 "cors_enabled": false,
                 "auth_disabled": true, // Using disabled for simplicity in test
+                "prefix_path": "/cf", // Test that prefix path is handled correctly
             }
         }
     });
@@ -265,7 +267,7 @@ async fn test_public_routes_accessible() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/healthz")
+                .uri("/cf/healthz")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -282,7 +284,7 @@ async fn test_public_routes_accessible() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/openapi.json")
+                .uri("/cf/openapi.json")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -306,6 +308,7 @@ async fn test_middleware_always_inserts_security_ctx() {
                 "enable_docs": false,
                 "cors_enabled": false,
                 "auth_disabled": true,
+                "prefix_path": "/cf",
             }
         }
     });
@@ -316,9 +319,9 @@ async fn test_middleware_always_inserts_security_ctx() {
     let api_gateway = api_gateway::ApiGateway::default();
     api_gateway.init(&api_ctx).await.expect("Failed to init");
 
-    let router = Router::new();
+    let mut router: Router = Router::new();
     let test_module = TestAuthModule;
-    let router = test_module
+    router = test_module
         .register_rest(&test_ctx, router, &api_gateway)
         .expect("Failed to register routes");
 
@@ -330,7 +333,7 @@ async fn test_middleware_always_inserts_security_ctx() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -355,6 +358,7 @@ async fn test_openapi_includes_security_metadata() {
                 "cors_enabled": false,
                 "auth_disabled": true,
                 "require_auth_by_default": true,
+                "prefix_path": "/cf",
             }
         }
     });
@@ -417,6 +421,7 @@ async fn test_route_pattern_matching_with_path_params() {
                 "enable_docs": false,
                 "cors_enabled": false,
                 "auth_disabled": true, // Disabled for test simplicity
+                "prefix_path": "/cf",
             }
         }
     });
@@ -427,9 +432,9 @@ async fn test_route_pattern_matching_with_path_params() {
     let api_gateway = api_gateway::ApiGateway::default();
     api_gateway.init(&api_ctx).await.expect("Failed to init");
 
-    let router = Router::new();
+    let mut router = Router::new();
     let test_module = TestAuthModule;
-    let router = test_module
+    router = test_module
         .register_rest(&test_ctx, router, &api_gateway)
         .expect("Failed to register routes");
 
@@ -442,7 +447,7 @@ async fn test_route_pattern_matching_with_path_params() {
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/users/123")
+                .uri("/cf/tests/v1/api/users/123")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -459,7 +464,7 @@ async fn test_route_pattern_matching_with_path_params() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/users/abc-def-456")
+                .uri("/cf/tests/v1/api/users/abc-def-456")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -550,6 +555,7 @@ async fn create_auth_enabled_router(mock: MockAuthNResolverClient, cors_enabled:
                 "enable_docs": false,
                 "cors_enabled": cors_enabled,
                 "auth_disabled": false,
+                "prefix_path": "/cf",
             }
         }
     });
@@ -570,9 +576,9 @@ async fn create_auth_enabled_router(mock: MockAuthNResolverClient, cors_enabled:
     let api_gateway = api_gateway::ApiGateway::default();
     api_gateway.init(&api_ctx).await.expect("Failed to init");
 
-    let router = Router::new();
+    let mut router = Router::new();
     let test_module = TestAuthEnabledModule;
-    let router = test_module
+    router = test_module
         .register_rest(&test_ctx, router, &api_gateway)
         .expect("Failed to register routes");
 
@@ -624,7 +630,7 @@ async fn test_valid_token_returns_200() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 .header(header::AUTHORIZATION, "Bearer valid-test-token")
                 .body(Body::empty())
                 .unwrap(),
@@ -649,7 +655,7 @@ async fn test_missing_token_returns_401() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 // No Authorization header
                 .body(Body::empty())
                 .unwrap(),
@@ -672,7 +678,7 @@ async fn test_invalid_token_returns_401() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 .header(header::AUTHORIZATION, "Bearer bad-token")
                 .body(Body::empty())
                 .unwrap(),
@@ -695,7 +701,7 @@ async fn test_no_plugin_available_returns_503() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 .header(header::AUTHORIZATION, "Bearer some-token")
                 .body(Body::empty())
                 .unwrap(),
@@ -719,7 +725,7 @@ async fn test_service_unavailable_returns_503() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 .header(header::AUTHORIZATION, "Bearer some-token")
                 .body(Body::empty())
                 .unwrap(),
@@ -742,7 +748,7 @@ async fn test_internal_error_returns_500() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 .header(header::AUTHORIZATION, "Bearer some-token")
                 .body(Body::empty())
                 .unwrap(),
@@ -768,7 +774,7 @@ async fn test_public_route_with_auth_enabled() {
     let response = router
         .oneshot(
             Request::builder()
-                .uri("/tests/v1/api/public-ctx")
+                .uri("/cf/tests/v1/api/public-ctx")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -804,7 +810,7 @@ async fn test_cors_preflight_skips_auth() {
         .oneshot(
             Request::builder()
                 .method(Method::OPTIONS)
-                .uri("/tests/v1/api/protected")
+                .uri("/cf/tests/v1/api/protected")
                 .header(header::ORIGIN, "https://example.com")
                 .header(header::ACCESS_CONTROL_REQUEST_METHOD, "GET")
                 .body(Body::empty())

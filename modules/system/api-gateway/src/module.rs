@@ -125,11 +125,13 @@ impl ApiGateway {
         // Always mark built-in health check routes as public
         public_routes.insert((Method::GET, "/health".to_owned()));
         public_routes.insert((Method::GET, "/healthz".to_owned()));
+
         public_routes.insert((Method::GET, "/docs".to_owned()));
         public_routes.insert((Method::GET, "/openapi.json".to_owned()));
 
         for spec in &self.openapi_registry.operation_specs {
             let spec = spec.value();
+
             let route_key = (spec.method.clone(), spec.path.clone());
 
             if spec.authenticated {
@@ -189,6 +191,7 @@ impl ApiGateway {
 
         // 11) License validation
         let license_map = middleware::license_validation::LicenseRequirementMap::from_specs(&specs);
+
         router = router.layer(from_fn(
             move |req: axum::extract::Request, next: axum::middleware::Next| {
                 let map = license_map.clone();
@@ -236,6 +239,7 @@ impl ApiGateway {
 
         // 8) Per-route rate limiting & in-flight limits
         let rate_map = middleware::rate_limit::RateLimiterMap::from_specs(&specs, &config)?;
+
         router = router.layer(from_fn(
             move |req: axum::extract::Request, next: axum::middleware::Next| {
                 let map = rate_map.clone();
@@ -491,6 +495,7 @@ impl ApiGateway {
         );
 
         let openapi_doc = Arc::new(self.build_openapi()?);
+        let config = self.get_cached_config();
 
         router = router
             .route(
@@ -517,7 +522,13 @@ impl ApiGateway {
                     }
                 }),
             )
-            .route("/docs", get(web::serve_docs));
+            .route(
+                "/docs",
+                get({
+                    let prefix = config.prefix_path;
+                    move || async move { web::serve_docs(&prefix) }
+                }),
+            );
 
         #[cfg(feature = "embed_elements")]
         {
@@ -594,6 +605,11 @@ impl modkit::contracts::ApiGatewayCapability for ApiGateway {
         tracing::debug!("Applying middleware stack to finalized router");
         let authn_client = self.authn_client.lock().clone();
         router = self.apply_middleware_stack(router, authn_client)?;
+
+        if !config.prefix_path.is_empty() {
+            let new_router = Router::new();
+            router = new_router.nest(config.prefix_path.as_str(), router);
+        }
 
         // Keep the finalized router to be used by `serve()`
         *self.final_router.lock() = Some(router.clone());

@@ -41,6 +41,8 @@ pub struct ApiGatewayConfig {
     /// If true, routes without explicit security requirement still require authentication (AuthN-only).
     #[serde(default = "default_require_auth_by_default")]
     pub require_auth_by_default: bool,
+
+    pub prefix_path: String,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
