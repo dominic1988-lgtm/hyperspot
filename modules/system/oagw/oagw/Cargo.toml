@@ -1,8 +1,15 @@
 [package]
 name = "cf-oagw"
-version.workspace = true
+description = "OAGW module - discovers and routes to plugins"
+version = "0.1.0"
 edition.workspace = true
 license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+readme = "README.md"
+keywords = ["cyberfabric", "cyberfabric-system"]
+categories = ["web-programming"]
 
 [lib]
 name = "oagw"
@@ -12,7 +19,7 @@ path = "src/lib.rs"
 test-utils = ["axum/ws", "dep:async-stream", "dep:futures", "dep:tower", "tokio/net", "tokio/sync", "tokio/rt"]
 
 [dependencies]
-cf-oagw-sdk = { path = "../oagw-sdk", features = ["axum"] }
+oagw-sdk = { path = "../oagw-sdk", package="cf-oagw-sdk", version = "0.1.0", features = ["axum"] }
 modkit = { workspace = true }
 modkit-security = { workspace = true }
 modkit-macros = { workspace = true }
